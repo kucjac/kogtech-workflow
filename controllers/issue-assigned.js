@@ -24,7 +24,7 @@ export default function issueAssigned(response) {
         icon_emoji: process.env.BOT_EMOJI || ':information_source:'
       }, err => {
         if (err) {
-      	  throw new Error(err);
+      	  console.log('Could not notify via Slack. Error:', err);
       	}
       });
     }
