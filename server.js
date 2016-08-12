@@ -14,21 +14,20 @@ app.use(bodyParser.json({ type: 'application/json' }));
 app.get('/redirect', redirect);
 
 // JIRA webhook handler
-app.post('/jira-webhook', function(req, res) {
-  console.log(`Incoming webhook at ${new Date()}`);
+app.post('/jira-webhook', (req, res) => {
+  debug('incoming')(`Incoming webhook at ${new Date()}`);
 
   // Switch case checks the issue type and runs the correct controller
   switch (req.body.issue_event_type_name) {
     case 'issue_assigned':
-      console.log('- Issue assigned');
       issueAssigned(req.body);
       break;
     // More cases can be added here to deal with various issue types
     default:
-      console.log(`- Unsupported issue type '${req.body.issue_event_type_name}'`);
+      debug('error')(`Unsupported issue type '${req.body.issue_event_type_name}'`);
   }
 });
 
-app.listen(process.env.PORT, function() {
-  console.log('Server running\n');
+app.listen(process.env.PORT, () => {
+  debug('info')(`Server running on port ${process.env.PORT}\n`);
 });
