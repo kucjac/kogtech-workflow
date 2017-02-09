@@ -22,6 +22,12 @@ app.post('/jira-webhook', (req, res) => {
     case 'issue_assigned':
       issueAssigned(req.body);
       break;
+    case 'issue_updated':
+      if (req.body.changelog.items[0] && req.body.changelog.items[0].field === 'assignee') {
+        console.log('- Issue assignee updated, proxy to issue assigned');
+        issueAssigned(req.body);
+      }
+      break;
     // More cases can be added here to deal with various issue types
     default:
       console.log(`- Unsupported issue type '${req.body.issue_event_type_name}'`);

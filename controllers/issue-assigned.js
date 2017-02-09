@@ -8,13 +8,25 @@ export default function issueAssigned(response) {
   console.log('- Issue assigned');
 
   const changelog = response.changelog.items[0];
-  const messageString = `${response.user.displayName} has just assigned ${response.issue.key} to you (${changelog.toString}) - https://opsview.atlassian.net/browse/${response.issue.key}`;
+  let messageString = `${response.user.displayName} has just assigned ${response.issue.key} to you (${changelog.toString}) - https://opsview.atlassian.net/browse/${response.issue.key}`;
+  const commentTotal = response.issue.fields.comment.total;
+  const comment = response.issue.fields.comment.comments[commentTotal - 1];
+  const wasCommentAddedInLast15Mins = Math.round(((new Date() - new Date(comment.created)) / 1000) / 60) < 15;
+
+  if (wasCommentAddedInLast15Mins) {
+    messageString = `${messageString} with the comment: _${comment.body}_`;
+  }
+
+  // We don't send it to you if you assigned it to yourself
+  if (response.user.displayName.toLowerCase() === changelog.toString.toLowerCase()) {
+    return false;
+  }
 
   changelog.to = changelog.to || '';
 
   getUserSlackIdFromEmail(changelog.to.toLowerCase(), (err, slackId) => {
     if (err) {
-      console.log(`- No Slack ID found for email ${changelog.to.toLowerCase()}`);
+      console.log(`- No Slack ID found for email ${changelog.to.toLowerCase()}`, err);
     } else {
       slack.api('chat.postMessage', {
         text: messageString,
