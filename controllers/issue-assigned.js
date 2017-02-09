@@ -5,13 +5,13 @@ import { getUserSlackIdFromEmail } from 'controllers/get-user';
 export default function issueAssigned(response) {
 
   // Announce what we're doing
-  console.log('- Issue assigned');
+  console.log(`- Issue assigned ${new Date()}`);
 
   const changelog = response.changelog.items[0];
   let messageString = `${response.user.displayName} has just assigned ${response.issue.key} to you (${changelog.toString}) - https://opsview.atlassian.net/browse/${response.issue.key}`;
   const commentTotal = response.issue.fields.comment.total;
   const comment = response.issue.fields.comment.comments[commentTotal - 1];
-  const wasCommentAddedInLast15Mins = Math.round(((new Date() - new Date(comment.created)) / 1000) / 60) < 15;
+  const wasCommentAddedInLast15Mins = comment && Math.round(((new Date() - new Date(comment.created)) / 1000) / 60) < 15;
 
   if (wasCommentAddedInLast15Mins) {
     messageString = `${messageString} with the comment: _${comment.body}_`;
@@ -26,8 +26,9 @@ export default function issueAssigned(response) {
 
   getUserSlackIdFromEmail(changelog.to.toLowerCase(), (err, slackId) => {
     if (err) {
-      console.log(`- No Slack ID found for email ${changelog.to.toLowerCase()}`, err);
+      console.log(`- No Slack ID found for email ${changelog.to.toLowerCase()} ${new Date()}`, err);
     } else {
+      console.log(`- Sending message to ${changelog.toString} from ${response.user.displayName} ${new Date()}`);
       slack.api('chat.postMessage', {
         text: messageString,
         channel: slackId,
@@ -38,6 +39,7 @@ export default function issueAssigned(response) {
         if (err) {
       	  console.log('Could not notify via Slack. Error:', err);
       	}
+	console.log(`- Message sent successfully ${new Date()}`)
       });
     }
   });
