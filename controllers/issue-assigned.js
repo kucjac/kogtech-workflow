@@ -1,6 +1,6 @@
 import fs from 'fs';
-import slack from 'controllers/slack';
-import { getUserSlackIdFromEmail } from 'controllers/get-user';
+import slack from './slack';
+import { getUserSlackIdFromEmail } from './get-user';
 
 export default function issueAssigned(response) {
 

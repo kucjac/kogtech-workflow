@@ -1,4 +1,4 @@
-import slack from 'controllers/slack';
+import slack from './slack';
 
 export function getUserSlackIdFromEmail(emailAddress, callback) {
   slack.api('users.list', (err, response) => {
