@@ -14,6 +14,10 @@ app.use(bodyParser.json({ type: 'application/json' }));
 
 // OAuth2 redirect handler
 //app.get('/redirect', redirect);
+import BitbucketActions from './actions/bitbucket-actions';
+app.get('/debug', (req, res) => {
+  BitbucketActions.mergePullRequestWithIssueKey('KST-123');
+});
 
 // JIRA webhook handler
 app.post('/jira-webhook', (req, res) => {
