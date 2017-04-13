@@ -1,8 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import request from 'request';
-import redirect from './routes/redirect';
-import issueAssigned from './controllers/issue-assigned';
+import jiraWebhook from './hooks/jira-webhook';
+//import redirect from './routes/redirect';
+//import issueAssigned from './controllers/issue-assigned';
+
 
 // Create the express app
 const app = express();
@@ -11,18 +13,39 @@ const app = express();
 app.use(bodyParser.json({ type: 'application/json' }));
 
 // OAuth2 redirect handler
-app.get('/redirect', redirect);
+//app.get('/redirect', redirect);
 
 // JIRA webhook handler
 app.post('/jira-webhook', (req, res) => {
-  console.log(`Incoming webhook at ${new Date()}`);
+
+  console.log(`Incoming JIRA webhook at ${new Date()}`);
+  console.log(req.body);
+  console.log(req.body.changelog.items);
+  jiraWebhook(req.body);
+
+  //const changelog_items = req.body.changelog.items;
+  //const type_of_change = changelog_item.field; // assignee, status
+  /*
+  { field: 'assignee',
+    fieldtype: 'jira',
+    from: 'marcus',
+    fromString: 'Marcus Erlandsson',
+    to: null,
+    toString: null },
+  { field: 'status',
+    fieldtype: 'jira',
+    from: '11100',
+    fromString: 'Backlog',
+    to: '3',
+    toString: 'In Progress' }
+    */
 
   // Switch case checks the issue type and runs the correct controller
-  switch (req.body.issue_event_type_name) {
+  /*switch (req.body.issue_event_type_name) {
     case 'issue_assigned':
-      issueAssigned(req.body);
+
       break;
-    case 'issue_updated':
+    case 'issue_generic':
       if (req.body.changelog.items[0] && req.body.changelog.items[0].field === 'assignee') {
         console.log('- Issue assignee updated, proxy to issue assigned');
         issueAssigned(req.body);
@@ -32,6 +55,7 @@ app.post('/jira-webhook', (req, res) => {
     default:
       console.log(`- Unsupported issue type '${req.body.issue_event_type_name}'`);
   }
+  */
 });
 
 app.listen(process.env.PORT, () => {
